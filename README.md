@@ -7,6 +7,7 @@ Technology Stack
 - Supabase
 
 ![alt text](https://github.com/Ngoni-Sama/event-management/blob/main/img/event%20screen.PNG)
+![alt text](https://github.com/Ngoni-Sama/event-management/blob/main/img/event%20screen%20showing%20delete%20and%20edit.PNG)
 open the terminal and run the following commands
 
 - Step 1: cd event-management  
