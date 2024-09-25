@@ -34,9 +34,9 @@ async def get_events():
     return response.data if response.data else []
 
 # Serve the HTML file
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/frontend", StaticFiles(directory="frontend"), name="static")
 
 @app.get("/", response_class=HTMLResponse)
 async def get_index():
-    with open("static/index.html") as f:
+    with open("frontend/index.html") as f:
         return HTMLResponse(content=f.read())

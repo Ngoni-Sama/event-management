@@ -1,13 +1,157 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Entry</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-100 p-6 flex flex-col">
+    <!-- Main Container -->
+    <div class="flex flex-row mb-6">
+        <!-- Event List Section -->
+        <div class="w-1/3 pr-4">
+            <h2 class="text-xl font-semibold mb-2">Event List</h2>
+            <div id="eventList" class="flex flex-col space-y-2">
+                <!-- Event buttons will be dynamically inserted here -->
+            </div>
+        </div>
+
+        <!-- Event Details Section -->
+        <div class="w-2/3 pl-4">
+            <h2 class="text-xl font-semibold mb-2">Event Details</h2>
+            <div id="eventDetails" class="border border-gray-300 p-4 rounded hidden">
+                <h3 id="detailTitle" class="text-lg font-bold"></h3>
+                <p id="detailDate" class="text-gray-600"></p>
+                <p id="detailDescription" class="text-gray-800"></p>
+                <!-- Buttons for editing and deleting the event -->
+                <div class="mt-4 flex space-x-2">
+                    <button id="editButton" class="bg-yellow-500 text-white p-2 rounded hover:bg-yellow-600">Edit</button>
+                    <button id="deleteButton" class="bg-red-500 text-white p-2 rounded hover:bg-red-600">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Entry Form Section -->
+    <div>
+        <h1 class="text-2xl font-bold mb-4">Enter Event Details</h1>
+        <form id="eventForm" class="mb-6">
+            <input type="text" id="title" placeholder="Event Title" required class="border border-gray-300 p-2 w-full mb-4 rounded">
+            <input type="date" id="date" required class="border border-gray-300 p-2 w-full mb-4 rounded">
+            <textarea id="description" placeholder="Event Description" class="border border-gray-300 p-2 w-full mb-4 rounded"></textarea>
+            <button type="submit" class="bg-green-300 text-white p-2 rounded hover:bg-green-400">Create Event</button>
+        </form>
+    </div>
+
+    <script>
+        let currentEventId = null; // Variable to hold the ID of the currently selected event
+
+        // Fetch and display events from the backend
+        async function fetchEvents() {
+            const response = await fetch("http://127.0.0.1:8000/events");
+            const events = await response.json();
+            const eventList = document.getElementById("eventList");
+            eventList.innerHTML = "";  // Clear existing events
+
+            // Create a button for each event displaying title and date
+            events.forEach(event => {
+                const eventButton = document.createElement("button");
+                eventButton.className = "event w-full text-left bg-white border border-gray-300 p-2 rounded hover:bg-gray-100 flex flex-col items-start";
+                
+                // Set inner HTML to include title and date
+                eventButton.innerHTML = `
+                    <span class="font-bold">${event.title}</span>
+                    <span class="text-gray-600">${event.date}</span>
+                `;
+                
+                // Show event details when the button is clicked
+                eventButton.onclick = () => showEventDetails(event);
+                
+                eventList.appendChild(eventButton);
+            });
+        }
+
+        // Show details for the clicked event
+        function showEventDetails(event) {
+            currentEventId = event.id;  // Store the current event ID
+            document.getElementById("detailTitle").innerText = event.title;
+            document.getElementById("detailDate").innerText = `Date: ${event.date}`;
+            document.getElementById("detailDescription").innerText = event.description;
+            document.getElementById("eventDetails").classList.remove("hidden");  // Show event details
+        }
+
+        // Handle form submission to create or update an event
+        document.getElementById("eventForm").addEventListener("submit", async function(event) {
+            event.preventDefault();  // Prevent the default form submission
+
+            const title = document.getElementById("title").value;
+            const date = document.getElementById("date").value;
+            const description = document.getElementById("description").value;
+
+            // Check if updating or creating a new event
+            if (currentEventId) {
+                // Update existing event
+                await fetch(`http://127.0.0.1:8000/events/${currentEventId}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ title, date, description }),
+                });
+            } else {
+                // Create new event
+                await fetch("http://127.0.0.1:8000/events", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ title, date, description }),
+                });
+            }
+
+            // Clear the form and reset current event ID
+            document.getElementById("eventForm").reset();
+            currentEventId = null; // Reset the current event ID
+            fetchEvents();  // Refresh the event list
+            document.getElementById("eventDetails").classList.add("hidden");  // Hide event details
+        });
+
+        // Handle the edit event button click
+        document.getElementById("editButton").addEventListener("click", () => {
+            if (currentEventId) {
+                // Populate the form with the current event details
+                document.getElementById("title").value = document.getElementById("detailTitle").innerText;
+                document.getElementById("date").value = document.getElementById("detailDate").innerText.replace("Date: ", "");
+                document.getElementById("description").value = document.getElementById("detailDescription").innerText;
+
+                // Show the form to allow editing
+                document.getElementById("eventDetails").classList.add("hidden"); // Hide details after starting edit
+            }
+        });
+
+        // Handle the delete event button click
+        document.getElementById("deleteButton").addEventListener("click", async () => {
+            if (currentEventId) {
+                // Confirm deletion
+                if (confirm("Are you sure you want to delete this event?")) {
+                    await fetch(`http://127.0.0.1:8000/events/${currentEventId}`, {
+                        method: "DELETE",
+                    });
+
+                    // Refresh the event list to remove the deleted event
+                    fetchEvents();  // Refresh the event list
+                    document.getElementById("eventDetails").classList.add("hidden");  // Hide details after deletion
+                    currentEventId = null;  // Reset the current event ID
+                }
+            }
+        });
+
+        // Fetch events on page load
+        fetchEvents();
+    </script>
+</body>
+
 </html>
