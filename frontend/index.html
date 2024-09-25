@@ -36,7 +36,7 @@
     </div>
 
     <!-- Event Entry Form Section -->
-    <div>
+    <div class="border border-gray-300 bg-gray-50 p-4 rounded">
         <h1 class="text-2xl font-bold mb-4">Enter Event Details</h1>
         <form id="eventForm" class="mb-6">
             <input type="text" id="title" placeholder="Event Title" required class="border border-gray-300 p-2 w-full mb-4 rounded">
@@ -120,7 +120,7 @@
         });
 
         // Handle the edit event button click
-        document.getElementById("editButton").addEventListener("click", () => {
+        document.getElementById("editButton").addEventListener("click", async () => {
             if (currentEventId) {
                 // Populate the form with the current event details
                 document.getElementById("title").value = document.getElementById("detailTitle").innerText;
@@ -129,6 +129,7 @@
 
                 // Show the form to allow editing
                 document.getElementById("eventDetails").classList.add("hidden"); // Hide details after starting edit
+                document.getElementById("eventForm").scrollIntoView(); // Scroll to form for editing
             }
         });
 
