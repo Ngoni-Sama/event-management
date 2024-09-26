@@ -6,6 +6,12 @@ Technology Stack
 - FastAPI
 - Supabase
 
+-features include
+-searh button
+-scrollbar (makes sure events are not too many to view on one page)
+-edit and delete button
+
+![alt text](https://github.com/Ngoni-Sama/event-management/blob/main/img/screen2.PNG)
 ![alt text](https://github.com/Ngoni-Sama/event-management/blob/main/img/event%20screen.PNG)
 ![alt text](https://github.com/Ngoni-Sama/event-management/blob/main/img/event%20screen%20showing%20delete%20and%20edit.PNG)
 open the terminal and run the following commands
