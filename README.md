@@ -6,10 +6,10 @@ Technology Stack
 - FastAPI
 - Supabase
 
--features include
--searh button
--scrollbar (makes sure events are not too many to view on one page)
--edit and delete button
+- features include
+- searh button
+- scrollbar (makes sure events are not too many to view on one page)
+- edit and delete button
 
 ![alt text](https://github.com/Ngoni-Sama/event-management/blob/main/img/screen2.PNG)
 ![alt text](https://github.com/Ngoni-Sama/event-management/blob/main/img/event%20screen.PNG)
