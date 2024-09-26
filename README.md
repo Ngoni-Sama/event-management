@@ -7,7 +7,7 @@ Technology Stack
 - Supabase
 
 - features include
-- searh button
+- search button
 - scrollbar (makes sure events are not too many to view on one page)
 - edit and delete button
 
