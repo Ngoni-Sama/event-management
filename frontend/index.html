@@ -6,6 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Event Entry</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Add custom styles for the event list */
+        #eventList {
+            max-height: 300px; /* Set a fixed height */
+            overflow-y: auto; /* Enable vertical scrollbar */
+        }
+    </style>
 </head>
 
 <body class="bg-gray-100 p-6 flex flex-col">
@@ -14,8 +21,13 @@
         <!-- Event List Section -->
         <div class="w-1/3 pr-4">
             <h2 class="text-xl font-semibold mb-2">Event List</h2>
+            <input type="text" id="searchInput" placeholder="Search events..." class="border border-gray-300 p-2 mb-4 w-full rounded">
             <div id="eventList" class="flex flex-col space-y-2">
                 <!-- Event buttons will be dynamically inserted here -->
+            </div>
+            <div class="mt-4">
+                <button id="viewAllButton" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mr-2">View All Events</button>
+                <button id="viewLessButton" class="bg-gray-500 text-white p-2 rounded hover:bg-gray-600 hidden">View Less</button>
             </div>
         </div>
 
@@ -48,11 +60,19 @@
 
     <script>
         let currentEventId = null; // Variable to hold the ID of the currently selected event
+        let allEvents = []; // Store all events for search functionality
+        const eventsToDisplay = 5; // Number of events to display at once
 
         // Fetch and display events from the backend
         async function fetchEvents() {
             const response = await fetch("http://127.0.0.1:8000/events");
-            const events = await response.json();
+            allEvents = await response.json();
+            allEvents.sort((a, b) => new Date(a.created) - new Date(b.created)); // Sort by creation date
+            displayEvents(allEvents.slice(0, eventsToDisplay)); // Display the latest 5 events
+        }
+
+        // Display events in the event list
+        function displayEvents(events) {
             const eventList = document.getElementById("eventList");
             eventList.innerHTML = "";  // Clear existing events
 
@@ -64,7 +84,7 @@
                 // Set inner HTML to include title and date
                 eventButton.innerHTML = `
                     <span class="font-bold">${event.title}</span>
-                    <span class="text-gray-600">${event.date}</span>
+                    <span class="text-gray-600">Date: ${event.date}</span>
                 `;
                 
                 // Show event details when the button is clicked
@@ -148,6 +168,30 @@
                     currentEventId = null;  // Reset the current event ID
                 }
             }
+        });
+
+        // Filter events based on search input
+        document.getElementById("searchInput").addEventListener("input", function() {
+            const searchTerm = this.value.toLowerCase();
+            const filteredEvents = allEvents.filter(event =>
+                event.title.toLowerCase().includes(searchTerm) ||
+                event.description.toLowerCase().includes(searchTerm)
+            );
+            displayEvents(filteredEvents.slice(0, eventsToDisplay)); // Display filtered events
+        });
+
+        // View all events when the button is clicked
+        document.getElementById("viewAllButton").addEventListener("click", function() {
+            displayEvents(allEvents); // Display all events
+            document.getElementById("viewLessButton").classList.remove("hidden"); // Show View Less button
+            this.classList.add("hidden"); // Hide View All button
+        });
+
+        // View less events when the button is clicked
+        document.getElementById("viewLessButton").addEventListener("click", function() {
+            displayEvents(allEvents.slice(0, eventsToDisplay)); // Display latest 5 events
+            document.getElementById("viewAllButton").classList.remove("hidden"); // Show View All button
+            this.classList.add("hidden"); // Hide View Less button
         });
 
         // Fetch events on page load
